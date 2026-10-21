@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Couchkino</title>
+  <meta name="theme-color" content="#0e0c14">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍿</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- Startseite -->
+  <main id="home" class="view hidden">
+    <div class="home-card">
+      <div class="logo big"><span class="pop">🍿</span><span>Couch<b>kino</b></span></div>
+      <p class="tagline">Zusammen schauen, egal wie weit weg.</p>
+      <label class="field"><span>Dein Name</span><input id="homeName" maxlength="24" placeholder="z. B. Alex" autocomplete="nickname"></label>
+      <button id="createRoom" class="btn primary wide">Neuen Raum erstellen</button>
+      <div class="or"><span>oder</span></div>
+      <div class="row">
+        <input id="joinCode" placeholder="Raum-Code oder Link" autocomplete="off">
+        <button id="joinRoom" class="btn">Beitreten</button>
+      </div>
+      <ul class="features">
+        <li><span>▶</span>YouTube synchron</li>
+        <li><span>🎥</span>Video- &amp; Sprachchat</li>
+        <li><span>💬</span>Textchat</li>
+        <li><span>👍</span>Playlist mit Abstimmung</li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- Raum -->
+  <div id="room" class="view hidden">
+    <header class="topbar">
+      <div class="logo"><span class="pop">🍿</span><span>Couch<b>kino</b></span></div>
+      <button id="copyLink" class="chip" title="Einladungslink kopieren">🔗 <span id="roomCode"></span><span class="hide-sm"> · Link kopieren</span></button>
+      <div class="spacer"></div>
+      <div id="presence" class="presence"></div>
+      <div id="connState" class="conn" title="Verbindung"></div>
+    </header>
+
+    <div class="layout">
+      <section class="stage">
+        <div class="player-wrap">
+          <div id="ytPlayer"></div>
+          <div id="emptyState" class="empty">
+            <div class="empty-inner">
+              <div class="big-emoji">🍿</div>
+              <h2>Noch läuft nichts</h2>
+              <p>Füg unten einen YouTube-Link ein – er startet sofort bei allen.</p>
+            </div>
+          </div>
+          <button id="tapToSync" class="tap-sync hidden">▶ Tippen zum Mitschauen</button>
+          <div id="reactionLayer" class="reaction-layer"></div>
+        </div>
+
+        <div class="now-bar">
+          <div class="now-info">
+            <span class="label">Jetzt läuft</span>
+            <span id="nowTitle" class="now-title">–</span>
+          </div>
+          <div id="reactionBtns" class="reactions"></div>
+          <button id="nextBtn" class="btn small" title="Nächstes Video aus der Playlist">⏭ Nächstes</button>
+        </div>
+
+        <div class="card queue">
+          <form id="addForm" class="add-row">
+            <input id="addInput" placeholder="YouTube-Link einfügen …" autocomplete="off">
+            <button class="btn primary" type="submit">Hinzufügen</button>
+          </form>
+          <div class="queue-head">
+            <h3>Als Nächstes <span id="queueCount" class="count"></span></h3>
+            <span class="hint">Meiste 👍 läuft zuerst · mehr 👎 als 👍 wird übersprungen</span>
+          </div>
+          <ul id="queueList" class="queue-list"></ul>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="card call">
+          <div id="tiles" class="tiles"></div>
+          <div class="call-controls">
+            <button id="micBtn" class="round" title="Mikrofon an/aus"></button>
+            <button id="camBtn" class="round" title="Kamera an/aus"></button>
+            <button id="settingsBtn" class="round" title="Kamera &amp; Mikro wählen">
+              <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.4-2.5a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="card chat">
+          <ul id="chatList" class="chat-list"></ul>
+          <form id="chatForm" class="chat-form">
+            <input id="chatInput" placeholder="Nachricht schreiben …" maxlength="1000" autocomplete="off">
+            <button class="btn primary send" type="submit" aria-label="Senden">➤</button>
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Beitreten -->
+  <div id="joinModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="logo"><span class="pop">🍿</span><span>Couch<b>kino</b></span></div>
+      <h2>Raum <span id="joinRoomCode" class="code"></span></h2>
+      <label class="field"><span>Dein Name</span><input id="joinName" maxlength="24" autocomplete="nickname"></label>
+      <div class="join-toggles">
+        <label class="toggle"><input type="checkbox" id="joinMic"><span>🎙️ Mikro an</span></label>
+        <label class="toggle"><input type="checkbox" id="joinCam"><span>🎥 Kamera an</span></label>
+      </div>
+      <p class="hint">Kannst du im Raum jederzeit an- und ausschalten – nur Chat geht auch.</p>
+      <button id="joinBtn" class="btn primary wide">Beitreten</button>
+    </div>
+  </div>
+
+  <!-- Einstellungen -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <h2>Kamera &amp; Mikro</h2>
+      <label class="field"><span>Kamera</span><select id="camSelect"></select></label>
+      <label class="field"><span>Mikrofon</span><select id="micSelect"></select></label>
+      <p class="hint">Tipp: Mit Kopfhörern gibt's kein Echo vom Video.</p>
+      <button id="settingsClose" class="btn primary wide">Fertig</button>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+  <script src="https://www.youtube.com/iframe_api" async></script>
+</body>
+</html>
